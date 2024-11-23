@@ -1,62 +1,40 @@
-import pickle
 import streamlit as st
 import numpy as np
+import pickle
 
-# Load models
-model_logistic = pickle.load(open('model_diabetes.sav', 'rb'))
+# Load the trained model
+model = pickle.load(open('diabetes_model.sv', 'rb'))
+
+#  app title
+st.title('Diabetes Prediction')
+
+# app description
+st.write("""
+This is a Simple Web app to Predict whether a Person has diabetes or not.To Predict,
+Please input the required values and click on the 'Predict' Button.
+""")
+
+# Function to make predictions
+def predict_diabetes(features):
+    return model.predict([features])
+
+# User input for the prediction
+age = st.number_input('Age', min_value=10, max_value=100, step=1)
+bmi = st.number_input('BMI', min_value=0.0, max_value=70.0, step=0.1)
+pregnancies = st.number_input('Pregnancies', min_value=0, max_value=20, step=1)
+glucose = st.number_input('Glucose', min_value=0, max_value=200, step=1)
+blood_pressure = st.number_input('Blood Pressure', min_value=20, max_value=200, step=1)
+skin_thickness = st.number_input('Skin Thickness', min_value=0, max_value=100, step=1)
+insulin = st.number_input('Insulin', min_value=0, max_value=900, step=1)
+
+dpf = st.number_input('Diabetes Pedigree Function', min_value=0.0, max_value=2.5, step=0.01)
 
 
-# Styling
-st.markdown(
-    """
-    <style>
-    body {
-        background-image: url("image.png");
-        background-size: cover;        
-        background-attachment: fixed;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
-
-st.markdown("<h1 style='text-align: center; color: darkblue;'>Diabetes Prediction</h1>", unsafe_allow_html=True)
-st.markdown("<h3 style='color: #333399;'>Please Enter the Required Information:</h3>", unsafe_allow_html=True)
-
-# Input fields
-model_choice = st.selectbox('Select the Model', ['Logistic Regression', 'Random Forest', 'Gaussian'])
-
-Pregnancies = st.number_input('Enter the Pregnancies value', min_value=0, step=1, key='Pregnancies')
-Glucose = st.number_input('Enter the Glucose value', min_value=0.0, key='Glucose')
-BloodPressure = st.number_input('Enter the Blood Pressure value', min_value=0.0, key='BloodPressure')
-SkinThickness = st.number_input('Enter the Skin Thickness value', min_value=0.0, key='SkinThickness')
-Insulin = st.number_input('Enter the Insulin value', min_value=0.0, key='Insulin')
-BMI = st.number_input('Enter the BMI value', min_value=0.0, key='BMI')
-DiabetesPedigreeFunction = st.number_input('Enter the Diabetes Pedigree Function value', min_value=0.0, key='DiabetesPedigreeFunction')
-Age = st.number_input('Enter the Age value', min_value=0, step=1, key='Age')
-
-# Prediction
-diabetes_diagnosis = ''
-
-if st.button('Diabetes Prediction Test', key='predict'):
-    # Select the model
-    if model_choice == 'Logistic Regression':
-        model = model_logistic
-    # elif model_choice == 'Random Forest':
-        # model = model_random_forest
-    # else:
-        # model = model_gaussian
-
-    # Prepare input data
-    input_data = np.array([[Pregnancies, Glucose, BloodPressure, SkinThickness, Insulin, BMI, DiabetesPedigreeFunction, Age]])
-    
-    try:
-        diabetes_prediction = model.predict(input_data)
-        if diabetes_prediction[0] == 1:
-            diabetes_diagnosis = "<p style='color: red; font-size: 20px;'>The patient has diabetes</p>"
-        else:
-            diabetes_diagnosis = "<p style='color: green; font-size: 20px;'>The patient does not have diabetes</p>"
-    except Exception as e:
-        diabetes_diagnosis = f"<p style='color: red; font-size: 20px;'>Error: {str(e)}</p>"
-
-st.markdown(diabetes_diagnosis, unsafe_allow_html=True)
+# Prediction button
+if st.button('Predict'):
+    user_data = [pregnancies, glucose, blood_pressure, skin_thickness, insulin, bmi, dpf, age]
+    prediction = predict_diabetes(user_data)
+    if prediction[0] == 1:
+        st.write('The model predicts that you have diabetes.')
+    else:
+        st.write('The model predicts that you do not have diabetes.')
